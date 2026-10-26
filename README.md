@@ -1,0 +1,123 @@
+# APAAR Student Data Management and Verification Platform
+
+A platform for AICTE-approved institutions to submit student-level admission data keyed on **APAAR ID**, with automated validation, intake monitoring and an AICTE dashboard.
+
+Built for the Smart India Hackathon problem statement: *APAAR ID-Based Student Data Management and Verification Platform for AICTE-Approved Institutions* (AICTE, Regulation Bureau).
+
+**Author:** Aditya Kumar (adityakumargen4@gmail.com)
+
+## Features (implemented)
+
+- **Institution upload:** CSV upload with a *dry run* mode that validates without saving
+- **APAAR validation:** missing, malformed (not 12 digits) and duplicate APAAR IDs
+- **Data consistency checks:** NRI, OCI and Foreign National flags checked against nationality; invalid or future DOB
+- **Cross-institution duplicate enrolment:** the same APAAR ID admitted at two places in the same year is rejected
+- **Identity mismatch detection:** an APAAR ID already registered with a different name or DOB is rejected
+- **Intake monitoring:** enrolment is derived from admission rows (never typed in), compared with approved intake; supernumerary seats are tracked separately
+- **AICTE dashboard:** programme-wise intake vs enrolment with EXCESS flags
+- **Audit log:** every upload is recorded
+- **Database migrations:** Alembic
+
+## Planned
+
+- Signed verifiable student records with QR verification
+- Consent-based verification for employers and regulators
+- Role-based access control and authentication
+- Anomaly detection and institution risk scores
+- Real APAAR/DigiLocker API integration (a mock adapter will be used until access is granted)
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Backend | FastAPI, SQLAlchemy, Alembic, Pydantic |
+| Database | SQLite (prototype), PostgreSQL-ready |
+| Frontend | React (Vite) |
+
+## Project structure
+
+```
+Apaar-Student-Platform/
+├── backend/
+│   ├── main.py             # FastAPI app and student endpoints
+│   ├── admissions_api.py   # institutions, programmes, admissions upload, compliance report
+│   ├── validation.py       # row-level CSV validation
+│   ├── compliance.py       # intake and duplicate-enrolment helpers
+│   ├── models.py           # SQLAlchemy models
+│   ├── schemas.py          # Pydantic schemas
+│   ├── database.py
+│   ├── migrations/         # Alembic migrations
+│   └── sample_data/        # CSV files for testing
+└── frontend/               # React app
+```
+
+## Run locally
+
+Requires Python 3.10+ and Node.js 18+.
+
+### Backend
+
+```bash
+cd backend
+pip install -r requirements.txt
+python -m alembic upgrade head
+python -m uvicorn main:app --reload
+```
+
+API docs: http://127.0.0.1:8000/docs
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173. To use a different API address, create `frontend/.env` with `VITE_API_URL=http://127.0.0.1:8000`.
+
+## Demo walkthrough
+
+1. In http://127.0.0.1:8000/docs, create institutions with `POST /institutions`:
+   ```json
+   {"code": "INST001", "name": "Demo Institute of Technology", "state": "Delhi"}
+   ```
+   ```json
+   {"code": "INST002", "name": "Demo Business School", "state": "Maharashtra"}
+   ```
+2. Create programmes with `POST /programmes`:
+   ```json
+   {"institution_code": "INST001", "name": "B.Tech CSE", "academic_year": "2025-26", "approved_intake": 3}
+   ```
+   ```json
+   {"institution_code": "INST002", "name": "MBA", "academic_year": "2025-26", "approved_intake": 5}
+   ```
+3. Open the React app, go to **Institution upload**, choose `backend/sample_data/btech_cse_batch.csv` (INST001, B.Tech CSE, 2025-26) and run a **dry run**. The result warns that regular enrolment 4 exceeds approved intake 3.
+4. Untick *Dry run* and save, then open **AICTE dashboard**. B.Tech CSE shows an **EXCESS +1** badge.
+5. Upload `backend/sample_data/mba_batch.csv` to INST002 / MBA. Two rows are rejected: one potential duplicate enrolment at INST001 and one APAAR ID registered with a different name or DOB.
+6. Upload `btech_cse_batch.csv` again to see every row rejected as already admitted.
+
+## CSV format
+
+```
+apaar_id,name,dob,category,nationality,is_nri,is_oci,is_foreign_national,is_supernumerary
+```
+
+`apaar_id`, `name` and `dob` (YYYY-MM-DD) are required. Flags accept yes/no, true/false or 1/0.
+
+## API overview
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/institutions` | Register an institution |
+| POST | `/programmes` | Define a programme and its approved intake |
+| POST | `/admissions/upload` | Upload admissions CSV (supports `dry_run`) |
+| GET | `/compliance/intake` | Intake vs enrolment report |
+| POST/GET | `/students` | Create and list students |
+| POST | `/students/upload` | Student-only CSV upload |
+
+## Limitations
+
+- APAAR IDs are checked for format only. Real registry verification needs government API access; a mock adapter with the same contract is planned.
+- No authentication yet.
+- SQLite is used for the prototype.
