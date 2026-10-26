@@ -98,3 +98,6 @@ app.include_router(auth_router)
 
 from risk_api import router as risk_router
 app.include_router(risk_router)
+
+from certificate import router as certificate_router
+app.include_router(certificate_router)

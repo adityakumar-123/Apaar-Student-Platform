@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import CertificateDownload from "./CertificateDownload";
 import { API, errorText, apiFetch, getSession } from "./api";
 
 async function call(path, options) {
@@ -104,6 +105,8 @@ export default function VerifyPage() {
           <input value={apaarId} onChange={(e) => setApaarId(e.target.value)} placeholder="12 digits" />
         </label>
         <button onClick={issue}>Issue credential</button>
+
+        {issued && <CertificateDownload credentialId={issued.credential_id} />}
 
         {issued && (
           <div className="qr">

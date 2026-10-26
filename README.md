@@ -171,3 +171,23 @@ Levels: LOW below 25, MEDIUM 25-49, HIGH 50 and above. Every flag carries a plai
 | Possible duplicate identity (same DOB, similar name, different APAAR ID) | 10 each, max 30 |
 
 Levels: LOW below 25, MEDIUM 25-49, HIGH 50 and above. Every flag carries a plain-language reason. Thresholds are constants in `backend/anomaly.py`. A flag means review, not wrongdoing. With real national-scale data, an unsupervised model such as Isolation Forest could be added on top of these rules.
+
+## Certificate with APAAR ID
+
+`GET /credentials/{credential_id}/certificate?student_id_no=...` (institution or AICTE login) returns a PDF showing the student's APAAR ID next to the institution's student ID, the programme, and a QR code that opens the public verification page. It is only produced for credentials that pass the signature check and are not revoked, an institution can only print its own, and each print is audit-logged. Set `FRONTEND_URL` so the QR points at the deployed site. Names are drawn with a built-in Latin font, so non-Latin scripts would need an embedded font.
+
+## Certificate with APAAR ID
+
+`GET /credentials/{credential_id}/certificate?student_id_no=...` (institution or AICTE login) returns a PDF showing the student's APAAR ID next to the institution's student ID, the programme, and a QR code that opens the public verification page. It is only produced for credentials that pass the signature check and are not revoked, an institution can only print its own, and each print is audit-logged. Set `FRONTEND_URL` so the QR points at the deployed site. Names are drawn with a built-in Latin font, so non-Latin scripts would need an embedded font.
+
+## Certificate with APAAR ID
+
+`GET /credentials/{credential_id}/certificate?student_id_no=...` (institution or AICTE login) returns a PDF showing the student's APAAR ID next to the institution's student ID, the programme, and a QR code that opens the public verification page. It is only produced for credentials that pass the signature check and are not revoked, an institution can only print its own, and each print is audit-logged. Set `FRONTEND_URL` so the QR points at the deployed site. Names are drawn with a built-in Latin font, so non-Latin scripts would need an embedded font.
+
+## Certificate with APAAR ID
+
+`GET /credentials/{credential_id}/certificate?student_id_no=...` (institution or AICTE login) returns a PDF showing the student's APAAR ID next to the institution's student ID, the programme, and a QR code that opens the public verification page. It is only produced for credentials that pass the signature check and are not revoked, an institution can only print its own, and each print is audit-logged. Set `FRONTEND_URL` so the QR points at the deployed site. Names are drawn with a built-in Latin font, so non-Latin scripts would need an embedded font.
+
+## Certificate with APAAR ID
+
+`GET /credentials/{credential_id}/certificate?student_id_no=...` (institution or AICTE login) returns a PDF showing the student's APAAR ID next to the institution's student ID, the programme, and a QR code that opens the public verification page. It is only produced for credentials that pass the signature check and are not revoked, an institution can only print its own, and each print is audit-logged. Set `FRONTEND_URL` so the QR points at the deployed site. Names are drawn with a built-in Latin font, so non-Latin scripts would need an embedded font.
