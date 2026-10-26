@@ -54,3 +54,28 @@ class Programme(Base):
     __table_args__ = (
         UniqueConstraint("institution_code", "name", "academic_year", name="uq_programme"),
     )
+
+from sqlalchemy import Text
+
+
+class Credential(Base):
+    __tablename__ = "credentials"
+    id = Column(String(36), primary_key=True)
+    apaar_id = Column(String(12), nullable=False, index=True)
+    payload = Column(Text, nullable=False)
+    signature = Column(String(64), nullable=False)
+    issued_at = Column(DateTime, server_default=func.now())
+    revoked = Column(Boolean, default=False)
+
+
+class ConsentRequest(Base):
+    __tablename__ = "consent_requests"
+    id = Column(String(36), primary_key=True)
+    credential_id = Column(String(36), ForeignKey("credentials.id"), nullable=False, index=True)
+    verifier_name = Column(String(150), nullable=False)
+    purpose = Column(String(200), nullable=False)
+    otp_hash = Column(String(64), nullable=False)
+    status = Column(String(20), default="pending")
+    attempts = Column(Integer, default=0)
+    created_at = Column(DateTime, server_default=func.now())
+    expires_at = Column(DateTime, nullable=False)
