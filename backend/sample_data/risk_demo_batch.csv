@@ -1,0 +1,7 @@
+﻿apaar_id,name,dob,category,nationality,is_nri,is_oci,is_foreign_national,is_supernumerary
+300000000001,Anaya Rao,2006-01-10,General,Indian,no,no,no,no
+300000000002,Tom Becker,2005-04-12,General,German,no,no,yes,yes
+300000000003,Li Wei,2005-06-23,General,Chinese,no,no,yes,yes
+300000000004,Amara Okoye,2005-09-02,General,Nigerian,no,no,yes,yes
+300000000005,Meera Iyer,2005-11-11,General,Indian,no,no,no,no
+300000000006,Rahul Sethi,2005-12-01,OBC,Indian,no,no,no,no
