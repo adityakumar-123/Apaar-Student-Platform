@@ -1,0 +1,9 @@
+﻿apaar_id,name,dob,category,nationality,is_nri,is_oci,is_foreign_national
+100000000001,Riya Sharma,2005-03-12,General,Indian,no,no,no
+100000000002,Aman Verma,2004-11-02,OBC,Indian,no,no,no
+100000000002,Aman Verma,2004-11-02,OBC,Indian,no,no,no
+12345,Neha Singh,2005-01-20,SC,Indian,no,no,no
+,Karan Mehta,2004-07-09,General,Indian,no,no,no
+100000000006,,2005-06-15,ST,Indian,no,no,no
+100000000007,John Smith,2004-02-28,General,Indian,no,no,yes
+100000000008,Priya Nair,2005-09-30,General,Indian,yes,no,no
