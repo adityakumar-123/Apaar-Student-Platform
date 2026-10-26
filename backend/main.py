@@ -88,3 +88,6 @@ async def upload_students(
     }
 from admissions_api import router as admissions_router
 app.include_router(admissions_router)
+
+from verification_api import router as verification_router
+app.include_router(verification_router)

@@ -31,3 +31,8 @@ th { background: #f0f2f5; }
 .fill { height: 100%; background: #2557d6; }
 .fill.over { background: #d64545; }
 .row-between { display: flex; justify-content: space-between; align-items: center; }
+.qr { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+.qr p { margin: 4px 0; font-size: 0.85rem; }
+.mono { font-family: monospace; word-break: break-all; }
+
+
