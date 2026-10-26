@@ -128,7 +128,7 @@ def analyse(db: Session):
     for a, b in find_near_duplicates(list(students.values())):
         text = (
             f"Possible duplicate identity: '{a[2]}' and '{b[2]}' share date of birth "
-            f"{a[3].isoformat()} but have different APAAR IDs (...{a[1][-4:]} / ...{b[1][-4:]})"
+            f"{a[3].isoformat()} but have different APAAR IDs ({a[1][:2]}****{a[1][-4:]} / {b[1][:2]}****{b[1][-4:]})"
         )
         for code in {a[4], b[4]}:
             if near_points[code] + 10 <= NEAR_DUPLICATE_CAP:
