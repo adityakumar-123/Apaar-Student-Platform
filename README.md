@@ -143,3 +143,31 @@ Run `python seed_users.py` from `backend` after the migrations to create demo ac
 Verification of a credential (masked result) and student OTP approval need no login. Set `JWT_SECRET` and `SIGNING_SECRET` in the environment for any real deployment.
 
 Limitations: no login rate limiting or account lockout yet, tokens live in sessionStorage, and HTTPS is required in production.
+
+## Anomaly detection and risk scores
+
+`GET /compliance/risk` (AICTE only) scores each institution from 0 to 100 using transparent, explainable rules:
+
+| Rule | Points |
+|---|---|
+| Regular enrolment above approved intake | 10-40, scaled by excess |
+| Supernumerary share above 20% | 15 |
+| NRI/OCI/Foreign National share above 30% | 15 |
+| Special-category share more than 2 standard deviations above peers (5+ institutions) | 10 |
+| Possible duplicate identity (same DOB, similar name, different APAAR ID) | 10 each, max 30 |
+
+Levels: LOW below 25, MEDIUM 25-49, HIGH 50 and above. Every flag carries a plain-language reason. Thresholds are constants in `backend/anomaly.py`. A flag means review, not wrongdoing. With real national-scale data, an unsupervised model such as Isolation Forest could be added on top of these rules.
+
+## Anomaly detection and risk scores
+
+`GET /compliance/risk` (AICTE only) scores each institution from 0 to 100 using transparent, explainable rules:
+
+| Rule | Points |
+|---|---|
+| Regular enrolment above approved intake | 10-40, scaled by excess |
+| Supernumerary share above 20% | 15 |
+| NRI/OCI/Foreign National share above 30% | 15 |
+| Special-category share more than 2 standard deviations above peers (5+ institutions) | 10 |
+| Possible duplicate identity (same DOB, similar name, different APAAR ID) | 10 each, max 30 |
+
+Levels: LOW below 25, MEDIUM 25-49, HIGH 50 and above. Every flag carries a plain-language reason. Thresholds are constants in `backend/anomaly.py`. A flag means review, not wrongdoing. With real national-scale data, an unsupervised model such as Isolation Forest could be added on top of these rules.

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import UploadPage from "./UploadPage";
 import Dashboard from "./Dashboard";
+import RiskPanel from "./RiskPanel";
 import VerifyPage from "./VerifyPage";
 import Login from "./Login";
 import { getSession, clearSession } from "./api";
@@ -12,6 +13,7 @@ export default function App() {
   const tabs = [];
   if (role === "institution" || role === "aicte") tabs.push(["upload", "Institution upload"]);
   if (role === "aicte") tabs.push(["dashboard", "AICTE dashboard"]);
+  if (role === "aicte") tabs.push(["risk", "Risk scores"]);
   tabs.push(["verify", "Verification"]);
 
   const [tab, setTab] = useState(() => {
@@ -58,6 +60,7 @@ export default function App() {
         )}
         {active === "upload" && <UploadPage />}
         {active === "dashboard" && <Dashboard />}
+        {active === "risk" && <RiskPanel />}
         {active === "verify" && <VerifyPage />}
       </main>
     </div>

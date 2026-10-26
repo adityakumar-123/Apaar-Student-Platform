@@ -95,3 +95,6 @@ app.include_router(verification_router)
 
 from auth import router as auth_router
 app.include_router(auth_router)
+
+from risk_api import router as risk_router
+app.include_router(risk_router)
