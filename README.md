@@ -121,3 +121,10 @@ apaar_id,name,dob,category,nationality,is_nri,is_oci,is_foreign_national,is_supe
 - APAAR IDs are checked for format only. Real registry verification needs government API access; a mock adapter with the same contract is planned.
 - No authentication yet.
 - SQLite is used for the prototype.
+## Verification and consent
+
+- `POST /credentials/{apaar_id}` issues an HMAC-SHA256 signed credential with a QR code
+- `GET /verify/{credential_id}` gives a public result with masked identity; altered records fail the signature check
+- `POST /consent/request` and `POST /consent/{id}/approve` implement OTP-based student consent; full details are shown only after approval (valid for 10 minutes)
+- Set `SIGNING_SECRET` in the environment for any real deployment; `DEMO_MODE=false` stops the OTP being returned in the API response
+- Production would use asymmetric signatures (for example Ed25519 or W3C Verifiable Credentials) and an SMS/DigiLocker OTP gateway
