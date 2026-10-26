@@ -32,3 +32,25 @@ class AuditLog(Base):
     action = Column(String(50))
     details = Column(String(500))
     created_at = Column(DateTime, server_default=func.now())
+
+from sqlalchemy import UniqueConstraint
+
+
+class Institution(Base):
+    __tablename__ = "institutions"
+    id = Column(Integer, primary_key=True)
+    code = Column(String(20), unique=True, nullable=False, index=True)
+    name = Column(String(200), nullable=False)
+    state = Column(String(50))
+
+
+class Programme(Base):
+    __tablename__ = "programmes"
+    id = Column(Integer, primary_key=True)
+    institution_code = Column(String(20), ForeignKey("institutions.code"), nullable=False, index=True)
+    name = Column(String(100), nullable=False)
+    academic_year = Column(String(9), nullable=False)
+    approved_intake = Column(Integer, nullable=False)
+    __table_args__ = (
+        UniqueConstraint("institution_code", "name", "academic_year", name="uq_programme"),
+    )

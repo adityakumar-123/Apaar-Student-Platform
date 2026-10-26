@@ -86,3 +86,5 @@ async def upload_students(
         "rejected": len(errors),
         "errors": errors,
     }
+from admissions_api import router as admissions_router
+app.include_router(admissions_router)
