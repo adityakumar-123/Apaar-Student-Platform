@@ -6,6 +6,7 @@ from database import get_db
 from models import Student, Admission, AuditLog, Institution, Programme
 from validation import validate_csv
 from compliance import read_supernumerary, find_active_admission, programme_counts
+from auth import require_roles, institution_scope
 
 router = APIRouter()
 
@@ -23,7 +24,7 @@ class ProgrammeIn(BaseModel):
     approved_intake: int = Field(gt=0)
 
 
-@router.post("/institutions", status_code=201)
+@router.post("/institutions", status_code=201, dependencies=[Depends(require_roles("aicte"))])
 def create_institution(data: InstitutionIn, db: Session = Depends(get_db)):
     if db.query(Institution).filter_by(code=data.code).first():
         raise HTTPException(409, "Institution code already exists")
@@ -33,7 +34,7 @@ def create_institution(data: InstitutionIn, db: Session = Depends(get_db)):
     return {"id": inst.id, **data.model_dump()}
 
 
-@router.post("/programmes", status_code=201)
+@router.post("/programmes", status_code=201, dependencies=[Depends(require_roles("aicte"))])
 def create_programme(data: ProgrammeIn, db: Session = Depends(get_db)):
     if not db.query(Institution).filter_by(code=data.institution_code).first():
         raise HTTPException(404, "Institution not found")
@@ -50,7 +51,7 @@ def create_programme(data: ProgrammeIn, db: Session = Depends(get_db)):
     return {"id": prog.id, **data.model_dump()}
 
 
-@router.post("/admissions/upload")
+@router.post("/admissions/upload", dependencies=[Depends(institution_scope)])
 async def upload_admissions(
     institution_code: str = Form(...),
     programme: str = Form(...),
@@ -160,7 +161,7 @@ async def upload_admissions(
     }
 
 
-@router.get("/compliance/intake")
+@router.get("/compliance/intake", dependencies=[Depends(require_roles("aicte"))])
 def intake_report(academic_year: str | None = None, db: Session = Depends(get_db)):
     query = db.query(Programme)
     if academic_year:

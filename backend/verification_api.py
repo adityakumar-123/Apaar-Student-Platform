@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import Student, Admission, Institution, Credential, ConsentRequest, AuditLog
+from auth import require_roles
 
 router = APIRouter()
 
@@ -51,7 +52,7 @@ class OtpIn(BaseModel):
     otp: str
 
 
-@router.post("/credentials/{apaar_id}", status_code=201)
+@router.post("/credentials/{apaar_id}", status_code=201, dependencies=[Depends(require_roles("institution", "aicte"))])
 def issue_credential(apaar_id: str, db: Session = Depends(get_db)):
     student = db.query(Student).filter_by(apaar_id=apaar_id).first()
     if not student:
@@ -95,7 +96,7 @@ def issue_credential(apaar_id: str, db: Session = Depends(get_db)):
     return {"credential_id": credential_id, "signature": signature, "payload": payload}
 
 
-@router.post("/credentials/{credential_id}/revoke")
+@router.post("/credentials/{credential_id}/revoke", dependencies=[Depends(require_roles("aicte"))])
 def revoke_credential(credential_id: str, db: Session = Depends(get_db)):
     cred = db.get(Credential, credential_id)
     if not cred:
@@ -106,7 +107,7 @@ def revoke_credential(credential_id: str, db: Session = Depends(get_db)):
     return {"credential_id": credential_id, "revoked": True}
 
 
-@router.post("/consent/request", status_code=201)
+@router.post("/consent/request", status_code=201, dependencies=[Depends(require_roles("verifier", "aicte"))])
 def request_consent(data: ConsentIn, db: Session = Depends(get_db)):
     cred = db.get(Credential, data.credential_id)
     if not cred:

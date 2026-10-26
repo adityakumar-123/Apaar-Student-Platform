@@ -6,6 +6,7 @@ from database import get_db
 from models import Student, AuditLog
 from schemas import StudentCreate, StudentOut
 from validation import validate_csv
+from auth import require_roles
 
 app = FastAPI(title="APAAR Student Platform")
 
@@ -27,7 +28,7 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/students", response_model=StudentOut, status_code=201)
+@app.post("/students", response_model=StudentOut, status_code=201, dependencies=[Depends(require_roles("aicte"))])
 def create_student(data: StudentCreate, db: Session = Depends(get_db)):
     if db.query(Student).filter_by(apaar_id=data.apaar_id).first():
         raise HTTPException(409, "Duplicate APAAR ID")
@@ -38,12 +39,12 @@ def create_student(data: StudentCreate, db: Session = Depends(get_db)):
     return student
 
 
-@app.get("/students", response_model=list[StudentOut])
+@app.get("/students", response_model=list[StudentOut], dependencies=[Depends(require_roles("aicte"))])
 def list_students(db: Session = Depends(get_db)):
     return db.query(Student).all()
 
 
-@app.get("/students/{apaar_id}", response_model=StudentOut)
+@app.get("/students/{apaar_id}", response_model=StudentOut, dependencies=[Depends(require_roles("aicte"))])
 def get_student(apaar_id: str, db: Session = Depends(get_db)):
     student = db.query(Student).filter_by(apaar_id=apaar_id).first()
     if not student:
@@ -51,7 +52,7 @@ def get_student(apaar_id: str, db: Session = Depends(get_db)):
     return student
 
 
-@app.post("/students/upload")
+@app.post("/students/upload", dependencies=[Depends(require_roles("aicte"))])
 async def upload_students(
     file: UploadFile = File(...),
     dry_run: bool = False,
@@ -91,3 +92,6 @@ app.include_router(admissions_router)
 
 from verification_api import router as verification_router
 app.include_router(verification_router)
+
+from auth import router as auth_router
+app.include_router(auth_router)

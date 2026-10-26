@@ -121,3 +121,25 @@ apaar_id,name,dob,category,nationality,is_nri,is_oci,is_foreign_national,is_supe
 - APAAR IDs are checked for format only. Real registry verification needs government API access; a mock adapter with the same contract is planned.
 - No authentication yet.
 - SQLite is used for the prototype.
+## Verification and consent
+
+- `POST /credentials/{apaar_id}` issues an HMAC-SHA256 signed credential with a QR code
+- `GET /verify/{credential_id}` gives a public result with masked identity; altered records fail the signature check
+- `POST /consent/request` and `POST /consent/{id}/approve` implement OTP-based student consent; full details are shown only after approval (valid for 10 minutes)
+- Set `SIGNING_SECRET` in the environment for any real deployment; `DEMO_MODE=false` stops the OTP being returned in the API response
+- Production would use asymmetric signatures (for example Ed25519 or W3C Verifiable Credentials) and an SMS/DigiLocker OTP gateway
+
+## Authentication and roles
+
+Run `python seed_users.py` from `backend` after the migrations to create demo accounts (demo only, never reuse these passwords):
+
+| Username | Password | Role |
+|---|---|---|
+| aicte_admin | Aicte@123 | aicte: full access, dashboard |
+| inst001_operator | Inst001@123 | institution (INST001): upload for own institution, issue credentials |
+| inst002_operator | Inst002@123 | institution (INST002) |
+| employer_demo | Verify@123 | verifier: request consent |
+
+Verification of a credential (masked result) and student OTP approval need no login. Set `JWT_SECRET` and `SIGNING_SECRET` in the environment for any real deployment.
+
+Limitations: no login rate limiting or account lockout yet, tokens live in sessionStorage, and HTTPS is required in production.

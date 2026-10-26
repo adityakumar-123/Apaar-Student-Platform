@@ -36,3 +36,5 @@ th { background: #f0f2f5; }
 .mono { font-family: monospace; word-break: break-all; }
 
 
+
+input[type="password"] { display: block; width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #cbd2d9; border-radius: 6px; }
