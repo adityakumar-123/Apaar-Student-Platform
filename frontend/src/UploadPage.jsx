@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { API, errorText } from "./api";
+import { API, errorText, apiFetch, getSession } from "./api";
 
 export default function UploadPage() {
-  const [institution, setInstitution] = useState("INST001");
+  const [institution, setInstitution] = useState(getSession()?.institution_code || "INST001");
   const [programme, setProgramme] = useState("B.Tech CSE");
   const [year, setYear] = useState("2025-26");
   const [dryRun, setDryRun] = useState(true);
@@ -28,7 +28,7 @@ export default function UploadPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API}/admissions/upload`, { method: "POST", body: form });
+      const res = await apiFetch(`${API}/admissions/upload`, { method: "POST", body: form });
       const data = await res.json();
       if (!res.ok) setError(errorText(data));
       else setResult(data);

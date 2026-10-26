@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { API } from "./api";
+import { API, apiFetch } from "./api";
 
 export default function Dashboard() {
   const [rows, setRows] = useState([]);
@@ -10,7 +10,7 @@ export default function Dashboard() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${API}/compliance/intake`);
+      const res = await apiFetch(`${API}/compliance/intake`);
       if (!res.ok) throw new Error();
       setRows(await res.json());
     } catch {

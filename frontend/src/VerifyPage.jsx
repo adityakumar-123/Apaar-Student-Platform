@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { API, errorText } from "./api";
+import { API, errorText, apiFetch, getSession } from "./api";
 
 async function call(path, options) {
   let res;
   try {
-    res = await fetch(`${API}${path}`, options);
+    res = await apiFetch(`${API}${path}`, options);
   } catch {
     throw new Error("Cannot reach the API. Is the backend running on port 8000?");
   }
@@ -30,6 +30,8 @@ function Row({ k, v }) {
 }
 
 export default function VerifyPage() {
+  const role = getSession()?.role;
+  const canIssue = role === "institution" || role === "aicte";
   const [apaarId, setApaarId] = useState("");
   const [issued, setIssued] = useState(null);
   const [credId, setCredId] = useState("");
@@ -94,6 +96,7 @@ export default function VerifyPage() {
       <h2>Verifiable student records</h2>
       {error && <p className="alert error">{error}</p>}
 
+      {canIssue && (
       <div className="card">
         <h3>1. Issue a signed credential</h3>
         <label>
@@ -115,6 +118,7 @@ export default function VerifyPage() {
           </div>
         )}
       </div>
+      )}
 
       <div className="card">
         <h3>2. Verify a credential</h3>
