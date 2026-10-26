@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Student
+from models import Student, AuditLog
 from schemas import StudentCreate, StudentOut
+from validation import validate_csv
 
 app = FastAPI(title="APAAR Student Platform")
 
@@ -16,10 +17,12 @@ app.add_middleware(
 )
 
 
-@app.get("/health")
 @app.get("/")
 def root():
     return {"message": "APAAR Student Platform API", "docs": "/docs"}
+
+
+@app.get("/health")
 def health():
     return {"status": "ok"}
 
@@ -46,3 +49,40 @@ def get_student(apaar_id: str, db: Session = Depends(get_db)):
     if not student:
         raise HTTPException(404, "Student not found")
     return student
+
+
+@app.post("/students/upload")
+async def upload_students(
+    file: UploadFile = File(...),
+    dry_run: bool = False,
+    db: Session = Depends(get_db),
+):
+    if not (file.filename or "").lower().endswith(".csv"):
+        raise HTTPException(400, "Please upload a .csv file")
+    try:
+        text = (await file.read()).decode("utf-8-sig")
+    except UnicodeDecodeError:
+        raise HTTPException(400, "File must be UTF-8 encoded")
+
+    existing_ids = {row[0] for row in db.query(Student.apaar_id).all()}
+    try:
+        valid, errors = validate_csv(text, existing_ids)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+    if not dry_run and valid:
+        db.add_all([Student(**r) for r in valid])
+        db.add(AuditLog(
+            actor="institution",
+            action="CSV_UPLOAD",
+            details=f"{file.filename}: {len(valid)} accepted, {len(errors)} rejected",
+        ))
+        db.commit()
+
+    return {
+        "dry_run": dry_run,
+        "total_rows": len(valid) + len(errors),
+        "accepted": len(valid),
+        "rejected": len(errors),
+        "errors": errors,
+    }
