@@ -101,3 +101,6 @@ app.include_router(risk_router)
 
 from certificate import router as certificate_router
 app.include_router(certificate_router)
+
+from reports_api import router as reports_router
+app.include_router(reports_router)
