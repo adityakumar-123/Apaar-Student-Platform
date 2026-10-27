@@ -16,6 +16,19 @@ def parse_bool(value):
     raise ValueError(f"'{value}' is not yes/no")
 
 
+def consistency_errors(nationality, flags):
+    """Checks NRI / OCI / Foreign National flags against nationality."""
+    errs = []
+    is_indian = (nationality or "Indian").lower() == "indian"
+    if flags.get("is_foreign_national") and is_indian:
+        errs.append("Marked Foreign National but nationality is Indian")
+    if flags.get("is_oci") and is_indian:
+        errs.append("Marked OCI but nationality is Indian")
+    if flags.get("is_nri") and flags.get("is_foreign_national"):
+        errs.append("Cannot be both NRI and Foreign National")
+    return errs
+
+
 def validate_csv(text, existing_ids):
     """Returns (valid_rows, errors). Row numbers match the spreadsheet (header = row 1)."""
     reader = csv.DictReader(io.StringIO(text))
@@ -70,13 +83,7 @@ def validate_csv(text, existing_ids):
 
         # 5. Consistency between nationality and special categories
         nationality = row.get("nationality") or "Indian"
-        is_indian = nationality.lower() == "indian"
-        if flags["is_foreign_national"] and is_indian:
-            errs.append("Marked Foreign National but nationality is Indian")
-        if flags["is_oci"] and is_indian:
-            errs.append("Marked OCI but nationality is Indian")
-        if flags["is_nri"] and flags["is_foreign_national"]:
-            errs.append("Cannot be both NRI and Foreign National")
+        errs.extend(consistency_errors(nationality, flags))
 
         if errs:
             errors.append({"row": n, "apaar_id": apaar or None, "errors": errs})

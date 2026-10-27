@@ -1,6 +1,7 @@
 import { useState } from "react";
 import UploadPage from "./UploadPage";
 import Dashboard from "./Dashboard";
+import InstitutionDashboard from "./InstitutionDashboard";
 import RiskPanel from "./RiskPanel";
 import VerifyPage from "./VerifyPage";
 import Login from "./Login";
@@ -11,6 +12,7 @@ export default function App() {
   const role = session?.role;
 
   const tabs = [];
+  if (role === "institution") tabs.push(["mine", "My dashboard"]);
   if (role === "institution" || role === "aicte") tabs.push(["upload", "Institution upload"]);
   if (role === "aicte") tabs.push(["dashboard", "AICTE dashboard"]);
   if (role === "aicte") tabs.push(["risk", "Risk scores"]);
@@ -20,7 +22,7 @@ export default function App() {
     if (new URLSearchParams(window.location.search).get("verify")) return "verify";
     const s = getSession();
     if (s?.role === "aicte") return "dashboard";
-    if (s?.role === "institution") return "upload";
+    if (s?.role === "institution") return "mine";
     return "verify";
   });
 
@@ -55,9 +57,10 @@ export default function App() {
         {active === "login" && (
           <Login onLogin={(s) => {
             setSession(s);
-            setTab(s.role === "aicte" ? "dashboard" : s.role === "institution" ? "upload" : "verify");
+            setTab(s.role === "aicte" ? "dashboard" : s.role === "institution" ? "mine" : "verify");
           }} />
         )}
+        {active === "mine" && <InstitutionDashboard />}
         {active === "upload" && <UploadPage />}
         {active === "dashboard" && <Dashboard />}
         {active === "risk" && <RiskPanel />}

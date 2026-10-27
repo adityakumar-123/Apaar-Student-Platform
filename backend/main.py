@@ -104,3 +104,9 @@ app.include_router(certificate_router)
 
 from reports_api import router as reports_router
 app.include_router(reports_router)
+
+from institution_api import router as institution_router
+app.include_router(institution_router)
+
+from updates_api import router as updates_router
+app.include_router(updates_router)
