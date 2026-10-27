@@ -8,6 +8,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-jwt}
       SIGNING_SECRET: ${SIGNING_SECRET:-dev-only-change-me}
       DEMO_MODE: ${DEMO_MODE:-true}
+      APAAR_REGISTRY: ${APAAR_REGISTRY:-off}
       FRONTEND_URL: http://localhost:5173
     volumes:
       - apaar-data:/data

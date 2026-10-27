@@ -3,10 +3,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Student, Admission, AuditLog, Institution, Programme
+from models import Student, Admission, AuditLog, Institution, Programme, User
 from validation import validate_csv
 from compliance import read_supernumerary, find_active_admission, programme_counts
 from auth import require_roles, institution_scope
+from apaar_registry import get_registry, registry_errors
 
 router = APIRouter()
 
@@ -51,13 +52,14 @@ def create_programme(data: ProgrammeIn, db: Session = Depends(get_db)):
     return {"id": prog.id, **data.model_dump()}
 
 
-@router.post("/admissions/upload", dependencies=[Depends(institution_scope)])
+@router.post("/admissions/upload")
 async def upload_admissions(
     institution_code: str = Form(...),
     programme: str = Form(...),
     academic_year: str = Form(...),
     dry_run: bool = Form(False),
     file: UploadFile = File(...),
+    user: User = Depends(institution_scope),
     db: Session = Depends(get_db),
 ):
     prog = db.query(Programme).filter_by(
@@ -79,6 +81,18 @@ async def upload_admissions(
         valid, errors = validate_csv(text, set())
     except ValueError as e:
         raise HTTPException(400, str(e))
+
+    # Optional registry check (APAAR_REGISTRY=mock): ID must exist and match name and DOB
+    registry = get_registry()
+    if registry:
+        still_valid = []
+        for row in valid:
+            errs = registry_errors(registry, row)
+            if errs:
+                errors.append({"row": None, "apaar_id": row["apaar_id"], "errors": errs})
+            else:
+                still_valid.append(row)
+        valid = still_valid
 
     super_map = read_supernumerary(text)
 
@@ -139,11 +153,11 @@ async def upload_admissions(
                 status="admitted",
             ))
         db.add(AuditLog(
-            actor=institution_code,
+            actor=user.username,
             action="ADMISSIONS_UPLOAD",
             details=(
-                f"{file.filename}: {len(accepted)} accepted, {len(errors)} rejected, "
-                f"{excess} over intake"
+                f"{institution_code} {programme} {academic_year} {file.filename}: "
+                f"{len(accepted)} accepted, {len(errors)} rejected, {excess} over intake"
             ),
         ))
         db.commit()
