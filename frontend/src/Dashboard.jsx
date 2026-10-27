@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ReportDownload from "./ReportDownload";
 import { API, apiFetch } from "./api";
 
 export default function Dashboard() {
@@ -33,6 +34,8 @@ export default function Dashboard() {
         <h2>Intake vs enrolment</h2>
         <button onClick={load}>Refresh</button>
       </div>
+
+      <ReportDownload />
 
       {error && <p className="alert error">{error}</p>}
       {loading && <p>Loading...</p>}
