@@ -1,0 +1,32 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: sqlite:////data/apaar.db
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-jwt}
+      SIGNING_SECRET: ${SIGNING_SECRET:-dev-only-change-me}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      FRONTEND_URL: http://localhost:5173
+    volumes:
+      - apaar-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  apaar-data:
