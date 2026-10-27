@@ -15,6 +15,9 @@ Built for the Smart India Hackathon problem statement: *APAAR ID-Based Student D
 - **Identity mismatch detection:** an APAAR ID already registered with a different name or DOB is rejected
 - **Intake monitoring:** enrolment is derived from admission rows (never typed in), compared with approved intake; supernumerary seats are tracked separately
 - **AICTE dashboard:** programme-wise intake vs enrolment with EXCESS flags
+- **Institution dashboard:** each institution sees its own programmes, risk flags, student list and recent activity
+- **Updates and corrections:** withdraw or re-admit a student, change a seat to or from supernumerary, correct student details; every change needs a reason and is audit-logged
+- **APAAR registry adapter:** optional mock registry check (`APAAR_REGISTRY=mock`) that the ID exists and matches name and DOB; the real API can replace it later
 - **Signed credentials:** HMAC-SHA256 signed records with QR verification and a certificate PDF
 - **Consent-based verification:** OTP-based student consent for employers and regulators
 - **Authentication and roles:** JWT login with `aicte`, `institution` and `verifier` roles
@@ -23,10 +26,12 @@ Built for the Smart India Hackathon problem statement: *APAAR ID-Based Student D
 - **Audit log:** uploads, certificate prints and exports are recorded
 - **Database migrations:** Alembic
 - **Docker:** one-command setup with Docker Compose
+- **Tests:** pytest suite covering validation, uploads, updates, access control and audit logging
 
 ## Planned
 
-- Real APAAR/DigiLocker API integration (a mock adapter with the same contract will be used until access is granted)
+- Real APAAR/DigiLocker API integration (the mock adapter in `apaar_registry.py` marks where it plugs in)
+- Service accounts / API keys for system-to-system integration with institutional ERPs
 - Asymmetric signatures (Ed25519 or W3C Verifiable Credentials) and an SMS/DigiLocker OTP gateway
 - Login rate limiting and account lockout
 - PDF reports and scheduled exports
@@ -55,12 +60,16 @@ Apaar-Student-Platform/
 │   ├── compliance.py         # intake and duplicate-enrolment helpers
 │   ├── anomaly.py            # risk rules and thresholds
 │   ├── certificate.py        # certificate PDF with QR code
+│   ├── institution_api.py    # institution dashboard and admissions list
+│   ├── updates_api.py        # admission status and student corrections
+│   ├── apaar_registry.py     # APAAR registry adapter (mock)
 │   ├── seed_users.py         # demo accounts
 │   ├── models.py             # SQLAlchemy models
 │   ├── schemas.py            # Pydantic schemas
 │   ├── database.py
 │   ├── migrations/           # Alembic migrations
-│   └── sample_data/          # CSV files for testing
+│   ├── tests/                # pytest suite
+│   └── sample_data/          # CSV files and mock registry for testing
 ├── frontend/                 # React app
 ├── docker-compose.yml
 └── .env.example
@@ -109,6 +118,7 @@ The backend (http://localhost:8000) applies migrations and creates the demo user
 | `SIGNING_SECRET` | Signs credentials |
 | `DEMO_MODE` | `true` returns the consent OTP in the API response; set `false` for any real deployment |
 | `FRONTEND_URL` | Base URL the certificate QR code points to |
+| `APAAR_REGISTRY` | `mock` checks uploads against `sample_data/apaar_registry.json`; `off` (default) checks format only |
 | `DATABASE_URL` | Database connection string |
 
 Always set your own `JWT_SECRET` and `SIGNING_SECRET` outside local demos.
@@ -164,6 +174,10 @@ apaar_id,name,dob,category,nationality,is_nri,is_oci,is_foreign_national,is_supe
 | POST | `/admissions/upload` | Upload admissions CSV (supports `dry_run`) |
 | GET | `/compliance/intake` | Intake vs enrolment report |
 | GET | `/compliance/risk` | Institution risk scores (AICTE only) |
+| GET | `/institution/dashboard` | Programmes, risk flags and activity for one institution (own institution, or AICTE with `institution_code`) |
+| GET | `/institution/admissions` | Student list for a programme and year |
+| PATCH | `/admissions/{apaar_id}` | Withdraw, cancel or re-admit; toggle supernumerary (reason required) |
+| PATCH | `/students/{apaar_id}` | Correct student details (name and DOB: AICTE only; reason required) |
 | POST/GET | `/students` | Create and list students |
 | POST | `/students/upload` | Student-only CSV upload |
 | POST | `/credentials/{apaar_id}` | Issue a signed credential |
@@ -173,6 +187,10 @@ apaar_id,name,dob,category,nationality,is_nri,is_oci,is_foreign_national,is_supe
 | POST | `/consent/request` | Request consent to view full details |
 | POST | `/consent/{id}/approve` | Student approves with OTP |
 | GET | `/reports/intake.csv`, `/reports/risk.csv` | CSV exports (AICTE only) |
+
+## Updates and corrections
+
+`PATCH /admissions/{apaar_id}` changes the status (`admitted`, `withdrawn`, `cancelled`) or the supernumerary flag of one admission. Withdrawing frees the seat in the intake count, and re-admitting is refused if the student is admitted elsewhere in the same year. `PATCH /students/{apaar_id}` corrects category, nationality and the NRI/OCI/FN flags, and checks that they stay consistent. Name and date of birth can only be corrected by AICTE, so a correction cannot be used to get around the identity-mismatch check. Both endpoints require a `reason`, and the audit log records who changed what (APAAR IDs are masked, and name/DOB changes are logged by field name only).
 
 ## Verification and consent
 
@@ -202,9 +220,19 @@ Levels: LOW below 25, MEDIUM 25-49, HIGH 50 and above. Every flag carries a plai
 
 AICTE users can download CSV reports from the dashboard: `GET /reports/intake.csv` (intake vs enrolment per programme, optional `academic_year` filter) and `GET /reports/risk.csv` (risk scores with each reason). Files open in Excel, cells starting with `=`, `+`, `-` or `@` are escaped, and every export is audit-logged. PDF reports and scheduled exports are not built yet.
 
+## Tests
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
+The suite uses a temporary SQLite database, so it never touches `apaar.db`.
+
 ## Limitations
 
-- APAAR IDs are checked for format only. Real registry verification needs government API access.
+- APAAR IDs are checked for format only unless the mock registry is enabled. Real registry verification needs government API access.
 - Credentials use a shared-secret HMAC signature; production would use asymmetric signatures.
 - No login rate limiting or account lockout yet, tokens live in sessionStorage, and HTTPS is required in production.
 - SQLite is used for the prototype.

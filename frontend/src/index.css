@@ -46,3 +46,4 @@ input[type="password"] { display: block; width: 100%; padding: 8px; margin-top: 
 .note { font-size: 0.85rem; color: #52606d; }
 
 .row-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.alert.ok { background: #d8f5e0; color: #11602d; }

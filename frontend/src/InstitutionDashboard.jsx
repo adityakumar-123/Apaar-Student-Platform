@@ -127,7 +127,7 @@ export default function InstitutionDashboard() {
       {selected && (
         <div className="card">
           <h3>{selected.programme} {selected.academic_year}: students</h3>
-          {notice && <p className="alert warn">{notice}</p>}
+          {notice && <p className={"alert " + (notice.startsWith("Updated") ? "ok" : "error")}>{notice}</p>}
           <table>
             <thead><tr><th>APAAR ID</th><th>Name</th><th>Category</th><th>Seat</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
