@@ -176,22 +176,6 @@ Levels: LOW below 25, MEDIUM 25-49, HIGH 50 and above. Every flag carries a plai
 
 `GET /credentials/{credential_id}/certificate?student_id_no=...` (institution or AICTE login) returns a PDF showing the student's APAAR ID next to the institution's student ID, the programme, and a QR code that opens the public verification page. It is only produced for credentials that pass the signature check and are not revoked, an institution can only print its own, and each print is audit-logged. Set `FRONTEND_URL` so the QR points at the deployed site. Names are drawn with a built-in Latin font, so non-Latin scripts would need an embedded font.
 
-## Certificate with APAAR ID
-
-`GET /credentials/{credential_id}/certificate?student_id_no=...` (institution or AICTE login) returns a PDF showing the student's APAAR ID next to the institution's student ID, the programme, and a QR code that opens the public verification page. It is only produced for credentials that pass the signature check and are not revoked, an institution can only print its own, and each print is audit-logged. Set `FRONTEND_URL` so the QR points at the deployed site. Names are drawn with a built-in Latin font, so non-Latin scripts would need an embedded font.
-
-## Certificate with APAAR ID
-
-`GET /credentials/{credential_id}/certificate?student_id_no=...` (institution or AICTE login) returns a PDF showing the student's APAAR ID next to the institution's student ID, the programme, and a QR code that opens the public verification page. It is only produced for credentials that pass the signature check and are not revoked, an institution can only print its own, and each print is audit-logged. Set `FRONTEND_URL` so the QR points at the deployed site. Names are drawn with a built-in Latin font, so non-Latin scripts would need an embedded font.
-
-## Certificate with APAAR ID
-
-`GET /credentials/{credential_id}/certificate?student_id_no=...` (institution or AICTE login) returns a PDF showing the student's APAAR ID next to the institution's student ID, the programme, and a QR code that opens the public verification page. It is only produced for credentials that pass the signature check and are not revoked, an institution can only print its own, and each print is audit-logged. Set `FRONTEND_URL` so the QR points at the deployed site. Names are drawn with a built-in Latin font, so non-Latin scripts would need an embedded font.
-
-## Certificate with APAAR ID
-
-`GET /credentials/{credential_id}/certificate?student_id_no=...` (institution or AICTE login) returns a PDF showing the student's APAAR ID next to the institution's student ID, the programme, and a QR code that opens the public verification page. It is only produced for credentials that pass the signature check and are not revoked, an institution can only print its own, and each print is audit-logged. Set `FRONTEND_URL` so the QR points at the deployed site. Names are drawn with a built-in Latin font, so non-Latin scripts would need an embedded font.
-
 ## Reports
 
 AICTE users can download CSV reports from the dashboard: `GET /reports/intake.csv` (intake vs enrolment per programme, optional `academic_year` filter) and `GET /reports/risk.csv` (risk scores with each reason). Files open in Excel, cells starting with `=`, `+`, `-` or `@` are escaped, and every export is audit-logged. PDF reports and scheduled exports are not built yet.
